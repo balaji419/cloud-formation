@@ -1,0 +1,53 @@
+---
+Parameters:
+  VPCid:
+    Type: 'AWS::EC2::VPC::Id'
+    Description: "This s the place we need to specify the vpc"
+    ConstraintDescription: Only choose from valid VPC
+  Subnetids:
+    Type: 'List<AWS::EC2::Subnet::Id>'
+    Description: Subnet which we want to deploy RDS Instance
+    ConstraintDescription:  must be two subnet id in two different availability zones
+  Allocatestorage:
+    Description: "This is the storage space for RDS instanmce"
+    MaxValue: "20"
+    MinValue: "1"
+    Type: Number
+  BackupRetentionPeriod:
+    MaxValue: "15"
+    MinValue: "5"
+    Type: Number
+  Dbname:
+    Default: balajidb
+    Description: "this is an name of db going to be created"
+    Type: String
+  MasterUserName:
+    Type: String
+  MasterUserPass:
+    Description: "This is going to be the password of master db"
+    NoEcho: true
+    Type: String
+Resources:
+  MyDBSubnetGroup:
+    Properties:
+      DBSubnetGroupDescription: "Subnet group created by cloudformation"
+      SubnetIds: !Ref Subnetids
+    Type: "AWS::RDS::DBSubnetGroup"
+  MyRDSInstance:
+    Properties:
+      AllocatedStorage: !Ref Allocatestorage
+      BackupRetentionPeriod: !Ref BackupRetentionPeriod
+      DBInstanceClass: db.t2.micro
+      DBInstanceIdentifier: balajiinstance
+      DBName: !Ref Dbname
+      DBSubnetGroupName: !Ref MyDBSubnetGroup
+      Engine: MySQL
+      EngineVersion: "5.7.21"
+      MasterUserPassword: !Ref MasterUserPass
+      MasterUsername: !Ref MasterUserName
+      MultiAZ: False
+      PubliclyAccessible: False
+      StorageType: gp2
+      VPCSecurityGroups:
+        - sg-84d290cc
+    Type: "AWS::RDS::DBInstance"
